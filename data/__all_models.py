@@ -1,1 +1,1 @@
-from .users import User
+from .alice_users import AliceUser

@@ -2,7 +2,7 @@ import logging
 import json
 
 from data import db_session
-from data.users import User
+from data.alice_users import AliceUser
 from const import *
 
 logging.basicConfig(level=logging.INFO)
@@ -30,7 +30,7 @@ def handle_dialog(res, req):
     if req['session']['new']:
         res['response']['buttons'] = []
         session = db_session.create_session()
-        user = session.query(User).filter(User.id_user == user_id).first()
+        user = session.query(AliceUser).filter(AliceUser.id_user == user_id).first()
         sessionStorage[user_id] = {
             'commands': ['Куплю', 'Продам', 'Помощь'],
             'current_dialog_id': '',
@@ -134,7 +134,7 @@ def get_first_name(req):
 
 
 def add_user_db(name, id_user):
-    user = User()
+    user = AliceUser()
     user.name = name
     user.id_user = id_user
     session = db_session.create_session()
