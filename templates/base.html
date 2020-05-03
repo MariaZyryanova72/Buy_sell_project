@@ -3,23 +3,34 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" >
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
 </head>
 <body>
 <header>
     <nav class="navbar navbar-light bg-light">
         <h4 class="style">Купи - продай</h4>
-        {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-        {% else %}
-            <p>
-                <a class="btn btn-danger" href="/register">Зарегистрироваться</a>
-                <a class="btn btn-info" href="/login">Войти</a>
-            </p>
-        {% endif %}
+        <div class="menu-main btn-group m-0 float-right btn-group-sm" role="group" aria-label="Button group with nested dropdown">
+            {% if current_user.is_authenticated %}
+                <button id="btnGroupDrop1" type="button" class="nav-link btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    {{ current_user.name }}</button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+                    <a class="dropdown-item" href="#">Личные объявления</a>
+                    <a class="dropdown-item" href="#">Настройки профиля</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Выход</a>
+                </div>
+            {% else %}
+                 <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link btn-primary" href="/register">Зарегистрироваться</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">Войти</a></li>
+                </ul>
+            {% endif %}
+        </div>
     </nav>
 </header>
 <main role="main" class="container">
