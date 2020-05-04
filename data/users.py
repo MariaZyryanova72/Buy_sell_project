@@ -13,7 +13,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     city = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     address = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True)
-    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String)
     create_date = sqlalchemy.Column(sqlalchemy.DateTime)
 
     def set_password(self, password):

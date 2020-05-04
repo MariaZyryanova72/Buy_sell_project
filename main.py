@@ -93,6 +93,8 @@ def logout():
 @app.route('/new_ad', methods=['GET', 'POST'])
 def new_ad():
     form = AdvertisingForm()
+    print(form.validate_on_submit())
+
     if form.validate_on_submit():
         session = db_session.create_session()
         advertising = Advertising()
@@ -104,7 +106,7 @@ def new_ad():
         advertising.instagram = form.instagram.data
         advertising.site = form.site.data
         advertising.telephone = form.telephone.data
-        f = request.files['file']
+        f = form.image.data
         t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))\
             + "." + f.filename.split('.')[-1]
         f.save(os.path.join('static/img/', t))
@@ -113,7 +115,7 @@ def new_ad():
         advertising.id_user = current_user.id
         session.add(advertising)
         session.commit()
-        return redirect('/')
+        return redirect('/my_advertising')
     return render_template('advertising.html', title='Создаем объявление',
                            form=form)
 
@@ -122,60 +124,61 @@ def new_ad():
 def my_advertising():
     session = db_session.create_session()
     if current_user.is_authenticated:
-        advertising = session.query(Advertising).filter((Advertising.id_user == current_user.id)).all()
+        advertising = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
+           Advertising.create_date.desc())
     else:
         return redirect("/login")
     return render_template("my_advertising.html", advertisings=advertising)
 
 
-"""@app.route('/edit_ad/<int:id>', methods=['GET', 'POST'])
+@app.route('/my_advertising/edit_ad/<int:ad_id>', methods=['GET', 'POST'])
 @login_required
-def edit_ad(id):
-    form = AdvertisingForm()
-    if request.method == "GET":
+def edit_ad(ad_id):
+    if current_user.is_authenticated:
+        form = AdvertisingForm()
         session = db_session.create_session()
-        advertising = session.query(Advertising).filter(Advertising.id == id).first()
+        advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+
         if advertising:
-            advertising = session.query(Advertising).filter(Advertising.id == id,
-                                                            (Advertising.id_user == current_user.id)).first()
-            if advertising:
+            image = advertising.image
+            if request.method == "GET":
                 form.title.data = advertising.title
                 form.text.data = advertising.text
                 form.id_category.data = advertising.id_category
                 form.price.data = advertising.price
                 form.vk.data = advertising.vk
-                advertising.instagram = form.instagram.data
-                advertising.site = form.site.data
-                advertising.telephone = form.telephone.data
-                f = request.files['file']
-                t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000))) \
-                    + "." + f.filename.split('.')[-1]
-                f.save(os.path.join('static/img/', t))
-                advertising.image = t
+                form.instagram.data = advertising.instagram
+                form.site.data = advertising.site
+                form.telephone.data = advertising.telephone
             else:
-                return "Вы не капитан и не создатель, значит не имеете доступ к работе"
+                print(form.validate_on_submit())
+                if form.validate_on_submit():
+                    advertising.title = form.title.data
+                    advertising.text = form.text.data
+                    advertising.id_category = form.id_category.data
+                    advertising.price = form.price.data
+                    advertising.vk = form.vk.data
+                    advertising.instagram = form.instagram.data
+                    advertising.site = form.site.data
+                    advertising.telephone = form.telephone.data
+                    if not form.image.data is None:
+                        f = form.image.data
+                        t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000))) \
+                            + "." + f.filename.split('.')[-1]
+                        f.save(os.path.join('static/img/', t))
+                        advertising.image = t
+                        try:
+                            os.remove(os.path.abspath(os.curdir + '/static/img/' + image))
+                        except Exception:
+                            pass
+                    session.commit()
+                    print(image)
+
+                    return redirect('/my_advertising')
         else:
             abort(404)
-    if form.validate_on_submit():
-        session = db_session.create_session()
-        jobs = session.query(Jobs).filter(Jobs.id == id).first()
-        if jobs:
-            jobs = session.query(Jobs).filter(Jobs.id == id,
-                                              ((Jobs.user == current_user) | (current_user.id == 1))).first()
-            if jobs:
-                jobs.title = form.title.data
-                jobs.team_leader = form.team_leader.data
-                jobs.work_size = form.work_size.data
-                jobs.collaborators = form.collaborators.data
-                jobs.is_finished = form.is_finished.data
-                session.commit()
-                return redirect('/')
-            else:
-                return "Вы не капитан и не создатель, значит не имеете доступ к работе"
-        else:
-            abort(404)
-    return render_template('job.html', title='Редактирование работы', form=form)
-"""
+        return render_template('advertising.html', title='Редактирование работы', form=form, image=image)
+    return redirect('/login')
 
 
 @app.route('/my_advertising/delete_ad/<int:ad_id>', methods=['GET'])

@@ -3,87 +3,105 @@
 {% block content %}
     <h1>Новое объявление</h1>
     <form action="" method="post" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
+    {{ form.hidden_tag() }}
         {{ form.csrf_token }}
-        <p>
-            {{ form.title.label }}<br>
-            {{ form.title(class="form-control") }}<br>
-            {% for error in form.title.errors %}
-                <p class="alert alert-danger" role="alert">
-                    {{ error }}
+
+        <div class="row border rounded mt-30 p-bottom-15 p-top-15">
+            <div class="col-md-4">
+                <p>
+                    <label for="photo">Приложите фотографию</label><br>
+                    {{form.image()}}<br>
+                    {% for error in form.image.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
                 </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.text.label }}<br>
-            {{ form.text(class="form-control") }}<br>
-            {% for error in form.text.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.id_category.label }}<br>
-            {{ form.id_category(class="form-control") }}<br>
-            {% for error in form.id_category.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.price.label }}<br>
-            {{ form.price(class="form-control") }}<br>
-            {% for error in form.price.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.vk.label }}<br>
-            {{ form.vk(class="form-control") }}<br>
-            {% for error in form.vk.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.instagram.label }}<br>
-            {{ form.instagram(class="form-control") }}<br>
-            {% for error in form.instagram.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.site.label }}<br>
-            {{ form.site(class="form-control") }}<br>
-            {% for error in form.site.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.telephone.label }}<br>
-            {{ form.telephone(class="form-control") }}<br>
-            {% for error in form.telephone.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            <div class="form-group">
-                <label for="photo">Приложите фотографию</label>
-                <input type="file" class="form-control-file" id="photo" name="file">
+                <img class="mt-15 br" src="/static/img/{{ image }}" width="100%">
             </div>
-            </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-        {{message}}
+            <div class="col-md-8">
+                <p>
+                    {{ form.title.label }}<br>
+                    {{ form.title(class="form-control") }}<br>
+                    {% for error in form.title.errors %}
+                        <p class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+
+                <div>
+                    <p>
+                        {{ form.text.label }}<br>
+                        {{ form.text(class="form-control") }}<br>
+                        {% for error in form.text.errors %}
+                            <p content="alert alert-danger" role="alert">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+                    </p>
+                </div>
+
+                <p>
+                    {{ form.id_category.label }}<br>
+                    {{ form.id_category(class="form-control") }}<br>
+                    {% for error in form.id_category.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+
+                <p>
+                    {{ form.price.label }}<br>
+                    {{ form.price(class="form-control") }}<br>
+                    {% for error in form.price.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+
+                <p>
+                    {{ form.vk.label }}<br>
+                    {{ form.vk(class="form-control") }}<br>
+                    {% for error in form.vk.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.instagram.label }}<br>
+                    {{ form.instagram(class="form-control") }}<br>
+                    {% for error in form.instagram.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.site.label }}<br>
+                    {{ form.site(class="form-control") }}<br>
+                    {% for error in form.site.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.telephone.label }}<br>
+                    {{ form.telephone(class="form-control") }}<br>
+                    {% for error in form.telephone.errors %}
+                        <p content="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </p>
+
+                <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+                {{message}}
+            </div>
+        </div>
     </form>
 {% endblock %}
