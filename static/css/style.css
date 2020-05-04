@@ -1,0 +1,29 @@
+.body_center {
+    margin-left: 15%;
+    margin-right: 2%;
+
+}
+
+.mt-30 {
+    margin-top: 30px;
+}
+
+.mt-15 {
+    margin-top: 15px;
+}
+
+.br {
+    border-radius: 10px;
+}
+
+.p-top-15 {
+    padding-top: 15px;
+}
+
+.p-bottom-15 {
+    padding-bottom: 15px;
+}
+
+.p-right-15 {
+    padding-right: 15px;
+}

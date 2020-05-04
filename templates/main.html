@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <div class="width40">
+            <a href="/new_ad" style="background: rgb(122,67,214);
+                               color: azure;
+                               margin-top: 20px" class="nav-link btn">Создать объявление</a>
+        </div>
+    {% endif %}
+{% endblock %}

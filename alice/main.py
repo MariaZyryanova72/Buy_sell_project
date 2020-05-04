@@ -2,7 +2,7 @@ import logging
 import json
 
 from data import db_session
-from data.users import User
+from data.alice_users import AliceUser
 from const import *
 
 logging.basicConfig(level=logging.INFO)
@@ -30,11 +30,10 @@ def handle_dialog(res, req):
     if req['session']['new']:
         res['response']['buttons'] = []
         session = db_session.create_session()
-        user = session.query(User).filter(User.id_user == user_id).first()
+        user = session.query(AliceUser).filter(AliceUser.id_user == user_id).first()
         sessionStorage[user_id] = {
-            'commands': ['Куплю', 'Продам', 'Помощь', 'Настроить профиль'],
+            'commands': ['Куплю', 'Продам', 'Помощь'],
             'current_dialog_id': '',
-            'settings': '',
             'first_name': None
         }
         if user:
@@ -81,12 +80,8 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Продам'
         sessionStorage[user_id]['current_dialog_id'] = 'Sel'
 
-    elif command == 'Настроить профиль' and command in sessionStorage[user_id]['commands']:
-        res['response']['text'] = 'Настроить профиль'
-        sessionStorage[user_id]['current_dialog_id'] = 'Set'
-
     elif command == 'В начало' and command in sessionStorage[user_id]['commands']:
-        sessionStorage[user_id]['commands'] = ['Куплю', 'Продам', 'Помощь', 'Настроить профиль']
+        sessionStorage[user_id]['commands'] = ['Куплю', 'Продам', 'Помощь']
         sessionStorage[user_id]['current_dialog_id'] = ''
         res['response']['text'] = 'Что хотите? Купить или продать?'
     alice_buttons(res, req)
@@ -115,12 +110,6 @@ def alice_buttons(res, req):
             {'title': "Помощь", 'hide': True}
         ]
 
-    elif sessionStorage[user_id]['current_dialog_id'] == 'Set':
-        res['response']['buttons'] = [
-            {'title': "В начало", 'hide': True},
-            {'title': "Помощь", 'hide': True}
-        ]
-
 
 def help_text(lst):
     return 'Команды, которые я понимаю:\n' + '\n'.join(lst)
@@ -129,16 +118,13 @@ def help_text(lst):
 def help_alice(res, req):
     user_id = req['session']['user_id']
     if sessionStorage[user_id]['current_dialog_id'] == '':
-        res['response']['text'] = help_text([BUY_TEXT, SELL_TEXT, SETTING_TEXT])
+        res['response']['text'] = help_text([BUY_TEXT, SELL_TEXT])
 
     if sessionStorage[user_id]['current_dialog_id'] == 'Buy':
         res['response']['text'] = help_text([SELL_TEXT, START_DIALOG_TEXT])
 
     if sessionStorage[user_id]['current_dialog_id'] == 'Sel':
-        res['response']['text'] = help_text([BUY_TEXT, SETTING_TEXT])
-
-    if sessionStorage[user_id]['current_dialog_id'] == 'Set':
-        res['response']['text'] = help_text([SETTING_TEXT])
+        res['response']['text'] = help_text([BUY_TEXT, START_DIALOG_TEXT])
 
 
 def get_first_name(req):
@@ -148,7 +134,7 @@ def get_first_name(req):
 
 
 def add_user_db(name, id_user):
-    user = User()
+    user = AliceUser()
     user.name = name
     user.id_user = id_user
     session = db_session.create_session()
