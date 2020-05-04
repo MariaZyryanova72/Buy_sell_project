@@ -1,10 +1,12 @@
 from flask import Flask, request, render_template, redirect
 import logging
+import datetime
+from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 
-from flask_login import login_user, LoginManager, login_required, logout_user
-
+from adform import AdvertisingForm
 from data import db_session
 from alice.main import dialog_alice
+from data.advertisings import Advertising
 from data.users import User
 from loginform import LoginForm
 from registerform import RegisterForm
@@ -53,6 +55,7 @@ def reqister():
             city=form.city.data,
             address=form.address.data,
             hashed_password=form.password.data,
+            create_date=datetime.datetime.now()
         )
 
         user.set_password(form.password.data)
@@ -82,6 +85,29 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/new_ad', methods=['GET', 'POST'])
+def new_ad():
+    form = AdvertisingForm()
+    if form.validate_on_submit():
+        session = db_session.create_session()
+        advertising = Advertising()
+        advertising.title = form.title.data
+        advertising.text = form.text.data
+        advertising.id_category = form.id_category.data
+        advertising.price = form.price.data
+        advertising.vk = form.vk.data
+        advertising.instagram = form.instagram.data
+        advertising.site = form.site.data
+        advertising.telephone = form.telephone.data
+        advertising.create_date = datetime.datetime.now()
+        advertising.id_user = current_user.id
+        session.add(advertising)
+        session.commit()
+        return redirect('/')
+    return render_template('advertising.html', title='Создаем объявление',
+                           form=form)
 
 
 @app.route('/alice', methods=['POST'])

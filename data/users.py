@@ -1,4 +1,3 @@
-import datetime
 import sqlalchemy
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
@@ -15,7 +14,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     address = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    create_date = sqlalchemy.Column(sqlalchemy.DateTime)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
