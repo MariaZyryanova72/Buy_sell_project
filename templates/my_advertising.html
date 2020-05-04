@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="width40">
+            <a href="/new_ad" style="background: rgb(122,67,214);
+                                       color: azure;
+                                       margin-top: 20px" class="nav-link btn">Создать объявление</a>
+    </div>
+
+    <h1>Мои объявления</h1>
+        {% for advertising in advertisings%}
+            <div class="col-md6 border rounded">
+                <h2>{{advertising.title}}</h2>
+            <div>
+                {{advertising.text}}
+            </div>
+            <div>
+                Автор - {{current_user.name}}, Дата написания - {{advertising.create_date}}
+            </div>
+                <a href="/#" class="btn btn-warning">Изменить</a>
+                <a href="/#" class="btn btn-danger">Удалить</a>
+            </div>
+        {% endfor %}
+{% endblock %}

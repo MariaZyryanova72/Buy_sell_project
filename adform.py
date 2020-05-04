@@ -12,4 +12,6 @@ class AdvertisingForm(FlaskForm):
     price = StringField("Цена товара", validators=[DataRequired()])
     text = TextAreaField("Текст объявления", validators=[DataRequired()])
     id_category = IntegerField("Категория товара", validators=[DataRequired()])
+    #image = StringField("Изображение товара", validators=[DataRequired()])
+
     submit = SubmitField('Опубликовать')

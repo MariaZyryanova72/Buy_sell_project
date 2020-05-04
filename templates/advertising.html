@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>Новое объявление</h1>
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         {{ form.csrf_token }}
         <p>
@@ -77,6 +77,12 @@
                 </p>
             {% endfor %}
         </p>
+        <p>
+            <div class="form-group">
+                <label for="photo">Приложите фотографию</label>
+                <input type="file" class="form-control-file" id="photo" name="file">
+            </div>
+            </p>
         <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
         {{message}}
     </form>

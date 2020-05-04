@@ -1,0 +1,6 @@
+
+.width40 {
+    width: 20%;
+    position: absolute; /* блок занимает ширину содержимого, max-width её ограничивает */
+    right: 10px;
+}

@@ -1,3 +1,6 @@
+import os
+import random
+
 from flask import Flask, request, render_template, redirect
 import logging
 import datetime
@@ -101,6 +104,11 @@ def new_ad():
         advertising.instagram = form.instagram.data
         advertising.site = form.site.data
         advertising.telephone = form.telephone.data
+        f = request.files['file']
+        t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))\
+            + "." + f.filename.split('.')[-1]
+        f.save(os.path.join('static/img/', t))
+        advertising.image = t
         advertising.create_date = datetime.datetime.now()
         advertising.id_user = current_user.id
         session.add(advertising)
@@ -108,6 +116,16 @@ def new_ad():
         return redirect('/')
     return render_template('advertising.html', title='Создаем объявление',
                            form=form)
+
+
+@app.route('/my_advertising', methods=['GET'])
+def my_advertising():
+    session = db_session.create_session()
+    if current_user.is_authenticated:
+        advertising = session.query(Advertising).filter((Advertising.id_user == current_user.id)).all()
+    else:
+        return redirect("/login")
+    return render_template("my_advertising.html", advertisings=advertising)
 
 
 @app.route('/alice', methods=['POST'])
