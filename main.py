@@ -1,7 +1,7 @@
 import os
 import random
 
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, abort
 import logging
 import datetime
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
@@ -126,6 +126,71 @@ def my_advertising():
     else:
         return redirect("/login")
     return render_template("my_advertising.html", advertisings=advertising)
+
+
+"""@app.route('/edit_ad/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_ad(id):
+    form = AdvertisingForm()
+    if request.method == "GET":
+        session = db_session.create_session()
+        advertising = session.query(Advertising).filter(Advertising.id == id).first()
+        if advertising:
+            advertising = session.query(Advertising).filter(Advertising.id == id,
+                                                            (Advertising.id_user == current_user.id)).first()
+            if advertising:
+                form.title.data = advertising.title
+                form.text.data = advertising.text
+                form.id_category.data = advertising.id_category
+                form.price.data = advertising.price
+                form.vk.data = advertising.vk
+                advertising.instagram = form.instagram.data
+                advertising.site = form.site.data
+                advertising.telephone = form.telephone.data
+                f = request.files['file']
+                t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000))) \
+                    + "." + f.filename.split('.')[-1]
+                f.save(os.path.join('static/img/', t))
+                advertising.image = t
+            else:
+                return "Вы не капитан и не создатель, значит не имеете доступ к работе"
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        session = db_session.create_session()
+        jobs = session.query(Jobs).filter(Jobs.id == id).first()
+        if jobs:
+            jobs = session.query(Jobs).filter(Jobs.id == id,
+                                              ((Jobs.user == current_user) | (current_user.id == 1))).first()
+            if jobs:
+                jobs.title = form.title.data
+                jobs.team_leader = form.team_leader.data
+                jobs.work_size = form.work_size.data
+                jobs.collaborators = form.collaborators.data
+                jobs.is_finished = form.is_finished.data
+                session.commit()
+                return redirect('/')
+            else:
+                return "Вы не капитан и не создатель, значит не имеете доступ к работе"
+        else:
+            abort(404)
+    return render_template('job.html', title='Редактирование работы', form=form)
+"""
+
+
+@app.route('/my_advertising/delete_ad/<int:ad_id>', methods=['GET'])
+@login_required
+def delete_jobs(ad_id):
+    if current_user.is_authenticated:
+        session = db_session.create_session()
+        advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+        if advertising:
+            session.delete(advertising)
+            session.commit()
+        else:
+            abort(404)
+        return redirect('/my_advertising')
+    return redirect('/login')
 
 
 @app.route('/alice', methods=['POST'])
