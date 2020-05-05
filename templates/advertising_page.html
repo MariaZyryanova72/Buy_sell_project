@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row" style="width: 100%; margin-left: -8%;">
+    <h1>Объявление</h1>
+        <div    class="row border rounded mt-30 p-bottom-15 p-top-15">
+            <div class="col-md-4">
+                <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
+            </div>
+            <div class="col-md-8">
+                <h2>{{ advertising.title }}</h2>
+                <br><div class="dropdown-divider"></div><br>
+                <div>
+                    {{ advertising.text }}
+                </div>
+                <br>
+                <div>
+                    <br>Автор - {{ current_user.name }}, Дата написания - {{ advertising.create_date }}
+                </div>
+
+
+            </div>
+        </div>
+</div>
+
+
+
+{% endblock %}

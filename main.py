@@ -196,6 +196,13 @@ def delete_jobs(ad_id):
     return redirect('/login')
 
 
+@app.route('/ad/<int:ad_id>', methods=['GET'])
+def advertising_page(ad_id):
+    session = db_session.create_session()
+    advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+    return render_template('advertising_page.html', title='Объявление', advertising=advertising)
+
+
 @app.route('/alice', methods=['POST'])
 def alice():
     return dialog_alice(request)
