@@ -1,7 +1,8 @@
 import os
 import random
+import shutil
 
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, abort
 import logging
 import datetime
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
@@ -90,9 +91,19 @@ def logout():
     return redirect("/")
 
 
+def get_random_name():
+    return "".join([str(random.randrange(0,9)) for _ in range(20)])
+
+
 @app.route('/new_ad', methods=['GET', 'POST'])
 def new_ad():
     form = AdvertisingForm()
+    if form.image.data is None:
+        random_name = get_random_name() + '.jpg'
+        shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'), os.path.abspath(os.curdir + '/static/img/' + random_name))
+    else:
+        random_name = get_random_name() + "." + form.image.data.filename.split(".")[-1]
+        form.image.data.save(os.path.join('static/img/', random_name))
     if form.validate_on_submit():
         session = db_session.create_session()
         advertising = Advertising()
@@ -104,28 +115,113 @@ def new_ad():
         advertising.instagram = form.instagram.data
         advertising.site = form.site.data
         advertising.telephone = form.telephone.data
-        f = request.files['file']
-        t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))\
-            + "." + f.filename.split('.')[-1]
-        f.save(os.path.join('static/img/', t))
+        t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))
+        if form.image.data is None:
+            t += '.jpg'
+            shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
+                            os.path.abspath(os.curdir + '/static/img/' + t))
+        else:
+            t += "." + form.image.data.filename.split('.')[-1]
+
+            shutil.move(os.path.abspath(os.curdir + '/static/img/' + random_name),
+                        os.path.abspath(os.curdir + '/static/img/' + t))
         advertising.image = t
         advertising.create_date = datetime.datetime.now()
         advertising.id_user = current_user.id
         session.add(advertising)
         session.commit()
-        return redirect('/')
+        return redirect('/my_advertising')
     return render_template('advertising.html', title='Создаем объявление',
-                           form=form)
+                           form=form, random_name=random_name)
 
 
 @app.route('/my_advertising', methods=['GET'])
 def my_advertising():
     session = db_session.create_session()
     if current_user.is_authenticated:
-        advertising = session.query(Advertising).filter((Advertising.id_user == current_user.id)).all()
+        advertising = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
+            Advertising.create_date.desc())
     else:
         return redirect("/login")
     return render_template("my_advertising.html", advertisings=advertising)
+
+
+@app.route('/my_advertising/edit_ad/<int:ad_id>', methods=['GET', 'POST'])
+@login_required
+def edit_ad(ad_id):
+    if current_user.is_authenticated:
+        form = AdvertisingForm()
+        session = db_session.create_session()
+        advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+
+        if advertising:
+            if form.image.data is None:
+                random_name = advertising.image
+                shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'), os.path.abspath(os.curdir + '/static/img/' + random_name))
+            else:
+                random_name = get_random_name() + "." + form.image.data.filename.split(".")[-1]
+                form.image.data.save(os.path.join('static/img/', random_name))
+            if request.method == "GET":
+                form.title.data = advertising.title
+                form.text.data = advertising.text
+                form.id_category.data = advertising.id_category
+                form.price.data = advertising.price
+                form.vk.data = advertising.vk
+                form.instagram.data = advertising.instagram
+                form.site.data = advertising.site
+                form.telephone.data = advertising.telephone
+            else:
+                if form.validate_on_submit():
+                    advertising.title = form.title.data
+                    advertising.text = form.text.data
+                    advertising.id_category = form.id_category.data
+                    advertising.price = form.price.data
+                    advertising.vk = form.vk.data
+                    advertising.instagram = form.instagram.data
+                    advertising.site = form.site.data
+                    advertising.telephone = form.telephone.data
+                    t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))
+                    if form.image.data is None:
+                        t += '.jpg'
+                        shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
+                                        os.path.abspath(os.curdir + '/static/img/' + t))
+                    else:
+                        t += "." + form.image.data.filename.split('.')[-1]
+
+                        shutil.move(os.path.abspath(os.curdir + '/static/img/' + random_name),
+                                    os.path.abspath(os.curdir + '/static/img/' + t))
+                    advertising.image = t
+                    session.commit()
+
+                    return redirect('/my_advertising')
+        else:
+            abort(404)
+        return render_template('advertising.html', title='Редактирование работы', form=form, random_name=random_name)
+    return redirect('/login')
+
+
+@app.route('/my_advertising/delete_ad/<int:ad_id>', methods=['GET'])
+@login_required
+def delete_jobs(ad_id):
+    if current_user.is_authenticated:
+        session = db_session.create_session()
+        advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+        if advertising:
+            image = advertising.image
+            session.delete(advertising)
+            session.commit()
+            os.remove(os.path.abspath(os.curdir + '/static/img/' + image))
+        else:
+            abort(404)
+        return redirect('/my_advertising')
+    return redirect('/login')
+
+
+@app.route('/ad/<int:ad_id>', methods=['GET'])
+def advertising_page(ad_id):
+    session = db_session.create_session()
+    advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
+    return render_template('advertising_page.html', title='Объявление', advertising=advertising)
 
 
 @app.route('/alice', methods=['POST'])

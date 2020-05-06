@@ -27,8 +27,8 @@
                             <div>
                                 <br>Автор - {{ current_user.name }}, Дата написания - {{ advertising.create_date }}
                             </div>
-                            <a href="/#" class="btn btn-warning">Изменить</a>
-                            <a href="/#" class="btn btn-danger">Удалить</a>
+                            <a href="/my_advertising/edit_ad/{{ advertising.id }}" class="btn btn-warning">Изменить</a>
+                            <a href="/my_advertising/delete_ad/{{ advertising.id }}" class="btn btn-danger">Удалить</a>
 
                         </div>
                     </div>
@@ -37,7 +37,7 @@
         <div class="col-md-2">
             <a href="/new_ad" style="background: rgb(122,67,214);
                                            color: azure;
-                                           margin-top: 20px" class="nav-link btn">Создать объявление</a>
+            margin-top: 20px" class="nav-link btn">Создать объявление</a>
         </div>
     </div>
 {% endblock %}
