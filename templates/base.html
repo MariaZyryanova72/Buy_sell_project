@@ -13,7 +13,18 @@
     <body>
         <header>
             <nav class="navbar navbar-light bg-light">
-                <h4 class="style">Купи - продай</h4>
+                <a style="color: rgba(202,59,206,0.75)" class="nav-link" href="/"><h4 class="style">Купи - продай</h4></a>
+                <div>
+                    <form action="/" method="get" class="al-vert" >
+                            <label >
+                                <input style="padding-bottom: 6px" type="text" name="q">
+                            </label>
+
+                            <button style="background: rgba(202,59,206,0.75)" class="btn btn-danger  btn-sm"  type="submit">Найти</button>
+                    </form>
+                </div>
+
+
                 <div class="menu-main btn-group m-0 float-right btn-group-sm" role="group" aria-label="Button group with nested dropdown">
                     {% if current_user.is_authenticated %}
                         <button id="btnGroupDrop1" type="button" style="background: rgba(202,59,206,0.75);
@@ -37,5 +48,6 @@
         </header>
         <div class="body_center">
         {% block content %}{% endblock %}
+        </div>
     </body>
 </html>

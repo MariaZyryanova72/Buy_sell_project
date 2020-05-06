@@ -35,9 +35,19 @@ def load_user(user_id):
     return session.query(User).get(user_id)
 
 
-@app.route('/')
+@app.route('/',  methods=['GET'])
 def index():
-    return render_template("main.html")
+    session = db_session.create_session()
+    q = request.args.get('q')
+    if q:
+        advertisings = session.query(Advertising).filter(Advertising.title.like(f'%{q}%') |
+                                                         Advertising.text.like(f'%{q}%')).all()
+    else:
+        advertisings = session.query(Advertising).all()
+
+    for ad in advertisings:
+        ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
+    return render_template('main.html', title='Главная страница', advertisings=advertisings)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -100,7 +110,8 @@ def new_ad():
     form = AdvertisingForm()
     if form.image.data is None:
         random_name = get_random_name() + '.jpg'
-        shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'), os.path.abspath(os.curdir + '/static/img/' + random_name))
+        shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
+                        os.path.abspath(os.curdir + '/static/img/' + random_name))
     else:
         random_name = get_random_name() + "." + form.image.data.filename.split(".")[-1]
         form.image.data.save(os.path.join('static/img/', random_name))
@@ -139,11 +150,13 @@ def new_ad():
 def my_advertising():
     session = db_session.create_session()
     if current_user.is_authenticated:
-        advertising = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
-            Advertising.create_date.desc())
+        advertisings = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
+            Advertising.create_date.desc()).all()
     else:
         return redirect("/login")
-    return render_template("my_advertising.html", advertisings=advertising)
+    for ad in advertisings:
+        ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
+    return render_template("my_advertising.html", advertisings=advertisings)
 
 
 @app.route('/my_advertising/edit_ad/<int:ad_id>', methods=['GET', 'POST'])

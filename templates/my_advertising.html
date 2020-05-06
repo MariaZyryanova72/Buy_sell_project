@@ -24,11 +24,15 @@
                                     {{ advertising.text }}
                                 {% endif %}
                             </div>
-                            <div>
-                                <br>Автор - {{ current_user.name }}, Дата написания - {{ advertising.create_date }}
+                            <div class="row">
+                                <div class="col-md6"><br>
+                                    <a href="/my_advertising/edit_ad/{{ advertising.id }}" class="btn btn-warning">Изменить</a>
+                                    <a href="/my_advertising/delete_ad/{{ advertising.id }}" class="btn btn-danger">Удалить</a>
+                                </div>
+                                <div class="col-md al-right">
+                                    <br>Дата написания - {{ advertising.create_date }}
+                                </div>
                             </div>
-                            <a href="/my_advertising/edit_ad/{{ advertising.id }}" class="btn btn-warning">Изменить</a>
-                            <a href="/my_advertising/delete_ad/{{ advertising.id }}" class="btn btn-danger">Удалить</a>
 
                         </div>
                     </div>
