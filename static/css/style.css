@@ -31,3 +31,29 @@
 .p-right-15 {
     padding-right: 15px;
 }
+
+.hidden {
+    display: none;
+}
+
+.photo {
+    display: inline-block; /* Строчно-блочный элемент */
+    position: relative; /* Относительное позиционирование */
+}
+.photo:hover::after {
+    content: attr(data-title); /* Выводим текст */
+    position: absolute; /* Абсолютное позиционирование */
+    left: 0px; right: 0px; bottom: 0px; top:0px; /* Положение подсказки */
+    z-index: 1; /* Отображаем подсказку поверх других элементов */
+    background: rgba(177, 95, 15, 0.53); /* Полупрозрачный цвет фона */
+    color: #fff; /* Цвет текста */
+    text-align: center; /* Выравнивание текста по центру */
+    display: flex;
+    justify-content: center; /*Центрирование по горизонтали*/
+    align-items: center;     /*Центрирование по вертикали */
+    font-family: Arial, sans-serif; /* Гарнитура шрифта */
+    font-size: 20px; /* Размер текста подсказки */
+    padding: 5px 10px; /* Поля */
+    border: 1px solid #333; /* Параметры рамки */
+    border-radius: 10px;
+}
