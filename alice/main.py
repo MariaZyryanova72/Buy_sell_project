@@ -1,9 +1,14 @@
 import logging
 import json
+import os
+import time
+from threading import Thread
 
 from data import db_session
+from data.advertisings import Advertising
 from data.alice_users import AliceUser
 from const import *
+import requests
 
 logging.basicConfig(level=logging.INFO)
 sessionStorage = {}
@@ -34,7 +39,9 @@ def handle_dialog(res, req):
         sessionStorage[user_id] = {
             'commands': ['Куплю', 'Продам', 'Помощь'],
             'current_dialog_id': '',
-            'first_name': None
+            'first_name': None,
+            'data_id_image': [],
+            'current_ad': 0
         }
         if user:
             res['response']['text'] = f'Привет, { user.name }!\n' \
@@ -72,8 +79,8 @@ def handle_dialog(res, req):
 
     elif command == 'Куплю' and command in sessionStorage[user_id]['commands']:
         sessionStorage[user_id]['commands'] = ['Продам', 'Помощь', 'В начало']
-        res['response']['text'] = 'Куплю'
         sessionStorage[user_id]['current_dialog_id'] = 'Buy'
+        res['response']['text'] = 'Что бы вы хотели купить?'
 
     elif command == 'Продам' and command in sessionStorage[user_id]['commands']:
         sessionStorage[user_id]['commands'] = ['Куплю', 'Помощь', 'В начало']
@@ -84,7 +91,66 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['commands'] = ['Куплю', 'Продам', 'Помощь']
         sessionStorage[user_id]['current_dialog_id'] = ''
         res['response']['text'] = 'Что хотите? Купить или продать?'
+
+    elif sessionStorage[user_id]['current_dialog_id'] == 'Buy':
+        search_data(res, req)
+        if not sessionStorage[user_id]['data']:
+            res['response']['text'] = 'Я ничего не нашла по вашему запросу. Введите что-нибудь другое!'
+        else:
+            res['response']['text'] = 'У меня есть кое-что для вас! Показать?'
+            sessionStorage[user_id]['current_dialog_id'] = 'BuyData'
+
+    elif command in ['Показать', 'Показать ещё'] and sessionStorage[user_id]['current_dialog_id'] == 'BuyData':
+        buy(res, req)
+        sessionStorage[user_id]['current_ad'] += 1
+        if (sessionStorage[user_id]['current_ad'] == 5) or len(sessionStorage[user_id]['data']) == sessionStorage[user_id]['current_ad']:
+            sessionStorage[user_id]['current_dialog_id'] = ''
+            sessionStorage[user_id]['commands'] = ['Продам', 'Помощь', 'В начало', 'Куплю']
+            sessionStorage[user_id]['data'] = []
+            sessionStorage[user_id]['data_id_image'] = []
+            sessionStorage[user_id]['current_ad'] = 0
+
+            res['response']['text'] = 'Поиск окончен. Что хотите? Купить или продать?'
+        else:
+            res['response']['text'] = ''
     alice_buttons(res, req)
+
+
+def worker(filename, title, req, res):
+    user_id = req['session']['user_id']
+    headers = {'Authorization': 'OAuth AgAAAAAxjNpYAAT7o-FF8PGuY0mlrZN0Uxt91Wo'}
+
+    myfiles = {'file': open(os.curdir + '/static/img/' + filename, 'rb')}
+    response = requests.post('https://dialogs.yandex.net/api/v1/skills/c05a819e-7883-4b1c-9ba5-e48f79b81efa/images',
+                             files=myfiles,
+                             headers=headers)
+    sessionStorage[user_id]['data_id_image'].append([json.loads(response.content)['image']['id'], title])
+
+
+def search_data(res, req):
+    a = time.time()
+    user_id = req['session']['user_id']
+    session = db_session.create_session()
+    q = req['request']['original_utterance']
+    advertisings = session.query(Advertising).filter(Advertising.title.like(f'%{q}%') |
+                                                     Advertising.text.like(f'%{q}%')).all()[:5]
+    sessionStorage[user_id]['data'] = [ad.image for ad in advertisings]
+
+    for ad in advertisings:
+        t = Thread(target=worker, args=(ad.image, ad.title, req, res,))
+        t.start()
+        t.join()
+    print(time.time() - a)
+
+
+def buy(res, req):
+    user_id = req['session']['user_id']
+    data = sessionStorage[user_id]['data_id_image'][0]
+    res['response']['card'] = {}
+    res['response']['text'] = ''
+    res['response']['card']['type'] = 'BigImage'
+    res['response']['card']['title'] = data[1]
+    res['response']['card']['image_id'] = data[0]
 
 
 def alice_buttons(res, req):
@@ -109,6 +175,18 @@ def alice_buttons(res, req):
             {'title': "В начало", 'hide': True},
             {'title': "Помощь", 'hide': True}
         ]
+
+    elif sessionStorage[user_id]['current_dialog_id'] == 'BuyData':
+        if sessionStorage[user_id]['current_ad'] == 0:
+            res['response']['buttons'] = [
+                {'title': "Показать", 'hide': True},
+                {'title': "В начало", 'hide': True},
+            ]
+        else:
+            res['response']['buttons'] = [
+                {'title': "Показать ещё", 'hide': True},
+                {'title': "В начало", 'hide': True},
+            ]
 
 
 def help_text(lst):
