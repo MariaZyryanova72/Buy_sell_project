@@ -1,7 +1,6 @@
 import logging
 import json
 import os
-import time
 from threading import Thread
 
 from data import db_session
@@ -103,7 +102,8 @@ def handle_dialog(res, req):
     elif command in ['Показать', 'Показать ещё'] and sessionStorage[user_id]['current_dialog_id'] == 'BuyData':
         buy(res, req)
         sessionStorage[user_id]['current_ad'] += 1
-        if (sessionStorage[user_id]['current_ad'] == 5) or len(sessionStorage[user_id]['data']) == sessionStorage[user_id]['current_ad']:
+        if (sessionStorage[user_id]['current_ad'] == 5) or len(sessionStorage[user_id]['data']) ==\
+                sessionStorage[user_id]['current_ad']:
             sessionStorage[user_id]['current_dialog_id'] = ''
             sessionStorage[user_id]['commands'] = ['Продам', 'Помощь', 'В начало', 'Куплю']
             sessionStorage[user_id]['data'] = []
@@ -116,19 +116,18 @@ def handle_dialog(res, req):
     alice_buttons(res, req)
 
 
-def worker(filename, title, req, res):
+def worker(filename, title, req):
     user_id = req['session']['user_id']
     headers = {'Authorization': 'OAuth AgAAAAAxjNpYAAT7o-FF8PGuY0mlrZN0Uxt91Wo'}
 
-    myfiles = {'file': open(os.curdir + '/static/img/' + filename, 'rb')}
+    my_files = {'file': open(os.curdir + '/static/img/' + filename, 'rb')}
     response = requests.post('https://dialogs.yandex.net/api/v1/skills/c05a819e-7883-4b1c-9ba5-e48f79b81efa/images',
-                             files=myfiles,
+                             files=my_files,
                              headers=headers)
     sessionStorage[user_id]['data_id_image'].append([json.loads(response.content)['image']['id'], title])
 
 
 def search_data(res, req):
-    a = time.time()
     user_id = req['session']['user_id']
     session = db_session.create_session()
     q = req['request']['original_utterance']
@@ -140,7 +139,6 @@ def search_data(res, req):
         t = Thread(target=worker, args=(ad.image, ad.title, req, res,))
         t.start()
         t.join()
-    print(time.time() - a)
 
 
 def buy(res, req):
