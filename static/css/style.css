@@ -43,7 +43,7 @@
 .photo:hover::after {
     content: attr(data-title); /* Выводим текст */
     position: absolute; /* Абсолютное позиционирование */
-    left: 0px; right: 0px; bottom: 0px; top:0px; /* Положение подсказки */
+    left: 0; right: 0; bottom: 0; top:0; /* Положение подсказки */
     z-index: 1; /* Отображаем подсказку поверх других элементов */
     background: rgba(177, 95, 15, 0.53); /* Полупрозрачный цвет фона */
     color: #fff; /* Цвет текста */
@@ -56,4 +56,25 @@
     padding: 5px 10px; /* Поля */
     border: 1px solid #333; /* Параметры рамки */
     border-radius: 10px;
+}
+
+.al-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: right
+}
+
+
+.button-search-autor-1 {
+    margin-left: 10px;
+    background-color: rgba(255, 173, 66, 0.93);
+    border: 2px solid rgba(226, 129, 15, 0.6);
+    height: 5vmin;
+    width: 60px;
+    border-radius: 20px;
+}
+
+.al-vert {
+    justify-content: center;
 }

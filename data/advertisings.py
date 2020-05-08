@@ -21,4 +21,3 @@ class Advertising(SqlAlchemyBase, SerializerMixin):
     id_user = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     id_category = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("categories.id"))
     categories = orm.relation("Category")
-

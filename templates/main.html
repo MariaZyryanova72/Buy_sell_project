@@ -1,11 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
-        <div class="width40">
-            <a href="/new_ad" style="background: rgb(122,67,214);
-                               color: azure;
-                               margin-top: 20px" class="nav-link btn">Создать объявление</a>
+
+    <div class="row">
+        <div class="col-md-10" style="width: 70%">
+            <h1>Объявления</h1>
+            {% for advertising in advertisings %}
+            <div class="row border rounded mt-30 p-bottom-15 p-top-15">
+                <div class="col-md-4">
+                    <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
+                </div>
+                <div class="col-md-8">
+
+                    {% if advertising.title|length > 30  %}
+                    <h2>{{ advertising.title[:30] + "..." }}</h2>
+                    {% else %}
+                    <h2>{{ advertising.title }}</h2>
+                    {% endif %}
+                    <br>
+                    <div>
+                        {% if advertising.text|length > 400 %}
+                        {{ advertising.text[:400] + "..." }}
+                        {% else %}
+                        {{ advertising.text }}
+                        {% endif %}
+                    </div>
+
+                    <div style="text-align: right">
+                        <br>Дата написания - {{ advertising.create_date }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-    {% endif %}
+    </div>
+
 {% endblock %}

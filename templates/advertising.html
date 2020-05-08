@@ -78,17 +78,18 @@
         {{message}}
     </div>
 </form>
+
 <script type="text/javascript">
     window.onload = function() {
         document.getElementById('img_click').addEventListener('click', function (e) {
             var input = document.getElementById("img");
-            input.type = 'file'
+            input.type = 'file';
             input.accept=".jpg, .jpeg, .png";
             input.onchange = e => {
                 var file = e.target.files[0];
                 document.getElementById("img_src").src = window.URL.createObjectURL(file);
                 form.image = input
-            }
+            };
             input.click();
         });
     };
