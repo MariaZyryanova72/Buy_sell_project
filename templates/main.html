@@ -6,7 +6,8 @@
         <div class="col-md-10" style="width: 70%">
             <h1>Объявления</h1>
             {% for advertising in advertisings %}
-            <div class="row border rounded mt-30 p-bottom-15 p-top-15">
+            <a style="text-decoration: none;
+                    color: #000 !important;" href="/ad/{{ advertising.id }}"><div class="row border rounded mt-30 p-bottom-15 p-top-15">
                 <div class="col-md-4">
                     <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
                 </div>
@@ -20,9 +21,9 @@
                     <br>
                     <div>
                         {% if advertising.text|length > 400 %}
-                        {{ advertising.text[:400] + "..." }}
+                            {{ advertising.text[:400] + "..." }}
                         {% else %}
-                        {{ advertising.text }}
+                            {{ advertising.text }}
                         {% endif %}
                     </div>
 
@@ -30,7 +31,7 @@
                         <br>Дата написания - {{ advertising.create_date }}
                     </div>
                 </div>
-            </div>
+            </div></a>
             {% endfor %}
         </div>
     </div>

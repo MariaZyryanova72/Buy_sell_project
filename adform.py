@@ -14,7 +14,7 @@ class AdvertisingForm(FlaskForm):
     telephone = StringField("Телефон для связи", validators=[DataRequired()])
     price = StringField("Цена товара")
     text = TextAreaField("Текст объявления")
-    id_category = IntegerField("Категория товара")
+    category = StringField("Категория товара")
     image = FileField("Изображение товара", validators=[FileAllowed(ALLOWED_EXTENSIONS, 'Выбранный файл не картинка!')])
     submit = SubmitField('Опубликовать')
 
@@ -32,6 +32,16 @@ class AdvertisingForm(FlaskForm):
             pass
         if type(res) != int:
             raise ValidationError(res)
+
+    def validate_text(form, field):
+        text = field.data
+        if text == '':
+            raise ValidationError(text)
+
+    def validate_title(form, field):
+        title = field.data
+        if title == '':
+            raise ValidationError(title)
 
 
 def start_check(tel):

@@ -136,7 +136,7 @@ def search_data(res, req):
     sessionStorage[user_id]['data'] = [ad.image for ad in advertisings]
 
     for ad in advertisings:
-        t = Thread(target=worker, args=(ad.image, ad.title, req, res,))
+        t = Thread(target=worker, args=(ad.image, ad.title, req,))
         t.start()
         t.join()
 

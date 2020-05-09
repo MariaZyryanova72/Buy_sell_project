@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Новое объявление</h1>
-<form action="" method="post" enctype="multipart/form-data">
+<form id="form" action="" method="post" enctype="multipart/form-data">
 
     {{ form.csrf_token }}
     <div style="width: 110%; margin-left: -8%;" class="border rounded">
@@ -21,8 +21,16 @@
                 </div>
 
                 <div>
-                    {{ form.id_category.label }}<br>
-                    {{ form.id_category(class="form-control") }}<br>
+                    <select id="cat_sel" onchange="category_sellect(this)">
+                        {% for cat in category %}
+                        {% if cat == form.category.data %}
+                        <option selected="selected"> {{ cat }}</option>
+                        {% else %}
+                        <option>{{ cat }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    {{form.category(class="hidden")}}
                 </div>
                 <div>
                     {{ form.price.label }}<br>
@@ -78,8 +86,7 @@
         {{message}}
     </div>
 </form>
-
-<script type="text/javascript">
+<script>
     window.onload = function() {
         document.getElementById('img_click').addEventListener('click', function (e) {
             var input = document.getElementById("img");
@@ -93,7 +100,10 @@
             input.click();
         });
     };
-
+    function category_sellect(obj) {
+        var btnValue = obj.options[obj.selectedIndex].value;
+        form.category.value = btnValue
+    }
 
 </script>
 {% endblock %}

@@ -7,7 +7,8 @@
                                        color: azure;
         margin-top: 20px" class="nav-link btn">Создать объявление</a>
             {% for advertising in advertisings %}
-                <div class="row border rounded mt-30 p-bottom-15 p-top-15">
+                <a style="text-decoration: none;
+                    color: #000 !important;" href="/ad/{{ advertising.id }}"><div class="row border rounded mt-30 p-bottom-15 p-top-15">
                     <div class="col-md-4">
                         <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
                     </div>
@@ -37,7 +38,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div></a>
             {% endfor %}
     </div>
 {% endblock %}

@@ -16,6 +16,7 @@ from adform import AdvertisingForm
 from data import db_session
 from alice.main import dialog_alice
 from data.advertisings import Advertising
+from data.categories import Category
 from data.users import User
 from loginform import LoginForm
 from registerform import RegisterForm
@@ -28,19 +29,6 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'bfhdjwiskoldjEFE4GUJFTYGGG5G5G65H6G565F3222JGTHGRFDJSKE;ROJELAGTRH4TF'
-
-
-def main():
-    db_session.global_init("db/buy_sell_db.sqlite")
-    api.add_resource(users_resource.UsersListResource, '/api/v1/users')
-    api.add_resource(users_resource.UsersResource, '/api/v1/user/<int:user_id>')
-
-    api.add_resource(alice_users_resource.AliceUsersListResource, '/api/v1/alice_users')
-    api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<int:user_id>')
-
-    api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
-    api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
-    app.run(port=5055)
 
 
 @app.errorhandler(404)
@@ -124,9 +112,23 @@ def get_random_name():
     return "".join([str(random.randrange(0,9)) for _ in range(20)])
 
 
+@app.route('/my_advertising', methods=['GET'])
+def my_advertising():
+    session = db_session.create_session()
+    if current_user.is_authenticated:
+        advertisings = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
+            Advertising.create_date.desc()).all()
+    else:
+        return redirect("/login")
+    for ad in advertisings:
+        ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
+    return render_template("my_advertising.html", advertisings=advertisings)
+
+
 @app.route('/new_ad', methods=['GET', 'POST'])
 def new_ad():
     form = AdvertisingForm()
+    #form.category = category[0]
     if form.image.data is None:
         random_name = get_random_name() + '.jpg'
         shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
@@ -134,17 +136,21 @@ def new_ad():
     else:
         random_name = get_random_name() + "." + form.image.data.filename.split(".")[-1]
         form.image.data.save(os.path.join('static/img/', random_name))
+    if form.category.data is None:
+        form.category.data = category[0]
     if form.validate_on_submit():
         session = db_session.create_session()
+        print(form.category.data)
         advertising = Advertising()
         advertising.title = form.title.data
         advertising.text = form.text.data
-        advertising.id_category = form.id_category.data
         advertising.price = form.price.data
         advertising.vk = form.vk.data
         advertising.instagram = form.instagram.data
         advertising.site = form.site.data
         advertising.telephone = form.telephone.data
+        categor = session.query(Category).filter(Category.name == form.category.data).first()
+        advertising.id_category = categor.id
         t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))
         if form.image.data is None:
             t += '.jpg'
@@ -162,20 +168,7 @@ def new_ad():
         session.commit()
         return redirect('/my_advertising')
     return render_template('advertising.html', title='Создаем объявление',
-                           form=form, random_name=random_name)
-
-
-@app.route('/my_advertising', methods=['GET'])
-def my_advertising():
-    session = db_session.create_session()
-    if current_user.is_authenticated:
-        advertisings = session.query(Advertising).filter(Advertising.id_user == current_user.id).order_by(
-            Advertising.create_date.desc()).all()
-    else:
-        return redirect("/login")
-    for ad in advertisings:
-        ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
-    return render_template("my_advertising.html", advertisings=advertisings)
+                           form=form, random_name=random_name, category=category)
 
 
 @app.route('/my_advertising/edit_ad/<int:ad_id>', methods=['GET', 'POST'])
@@ -197,22 +190,24 @@ def edit_ad(ad_id):
             if request.method == "GET":
                 form.title.data = advertising.title
                 form.text.data = advertising.text
-                form.id_category.data = advertising.id_category
                 form.price.data = advertising.price
                 form.vk.data = advertising.vk
                 form.instagram.data = advertising.instagram
                 form.site.data = advertising.site
                 form.telephone.data = advertising.telephone
+                categor = session.query(Category).filter(Category.id == advertising.id_category).first()
+                form.category.data = categor.name
             else:
                 if form.validate_on_submit():
                     advertising.title = form.title.data
                     advertising.text = form.text.data
-                    advertising.id_category = form.id_category.data
                     advertising.price = form.price.data
                     advertising.vk = form.vk.data
                     advertising.instagram = form.instagram.data
                     advertising.site = form.site.data
                     advertising.telephone = form.telephone.data
+                    categor = session.query(Category).filter(Category.name == form.category.data).first()
+                    advertising.id_category = categor.id
                     t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))
                     if form.image.data is None:
                         t += '.jpg'
@@ -229,7 +224,8 @@ def edit_ad(ad_id):
                     return redirect('/my_advertising')
         else:
             abort(404)
-        return render_template('advertising.html', title='Редактирование работы', form=form, random_name=random_name)
+        return render_template('advertising.html', title='Редактирование работы', form=form, random_name=random_name,
+                               category=category)
     return redirect('/login')
 
 
@@ -254,7 +250,9 @@ def delete_jobs(ad_id):
 def advertising_page(ad_id):
     session = db_session.create_session()
     advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
-    return render_template('advertising_page.html', title='Объявление', advertising=advertising)
+    id_cat = advertising.id_category
+    category = session.query(Category).filter(Category.id == id_cat).first()
+    return render_template('advertising_page.html', title='Объявление', advertising=advertising, category=category)
 
 
 @app.route('/alice', methods=['POST'])
@@ -263,4 +261,18 @@ def alice():
 
 
 if __name__ == '__main__':
-    main()
+    db_session.global_init("db/buy_sell_db.sqlite")
+    api.add_resource(users_resource.UsersListResource, '/api/v1/users')
+    api.add_resource(users_resource.UsersResource, '/api/v1/user/<int:user_id>')
+
+    api.add_resource(alice_users_resource.AliceUsersListResource, '/api/v1/alice_users')
+    api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<int:user_id>')
+
+    api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
+    api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
+
+    session = db_session.create_session()
+    category = [cat.name for cat in session.query(Category).all()]
+
+    app.run(port=5055)
+
