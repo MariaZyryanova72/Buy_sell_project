@@ -218,4 +218,4 @@ def add_user_db(name, user_id):
 
 
 if __name__ == '__main__':
-    app.run(port=5057)
+    app.run(host="0.0.0.0", port=5057, debug=True)

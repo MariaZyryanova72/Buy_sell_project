@@ -8,15 +8,15 @@ import datetime
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from flask_restful import Api
 
-from server import category_resource, advertings_resource, alice_users_resource, users_resource
+from server.api import advertings_resource, alice_users_resource, category_resource, users_resource
 
-from server.adform import AdvertisingForm
+from server.form.adform import AdvertisingForm
 from server.data import db_session
 from server.data.advertisings import Advertising
 from server.data.categories import Category
 from server.data.users import User
-from server.loginform import LoginForm
-from server.registerform import RegisterForm
+from server.form.loginform import LoginForm
+from server.form.registerform import RegisterForm
 
 logging.basicConfig(level=logging.INFO)
 
@@ -276,4 +276,4 @@ if __name__ == '__main__':
             )
             session.add(categor)
             session.commit()
-    app.run(debug=True, host='127.0.0.1', port=5055)
+    app.run(debug=True, host='0.0.0.0', port=5055)
