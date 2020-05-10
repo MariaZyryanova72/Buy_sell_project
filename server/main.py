@@ -8,22 +8,17 @@ import datetime
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from flask_restful import Api
 
-import users_resource
-import alice_users_resource
-import advertings_resource
-import category_resource
+from server import category_resource, advertings_resource, alice_users_resource, users_resource
 
-from adform import AdvertisingForm
-from data import db_session
-from alice.main import dialog_alice
-from data.advertisings import Advertising
-from data.categories import Category
-from data.users import User
-from loginform import LoginForm
-from registerform import RegisterForm
+from server.adform import AdvertisingForm
+from server.data import db_session
+from server.data.advertisings import Advertising
+from server.data.categories import Category
+from server.data.users import User
+from server.loginform import LoginForm
+from server.registerform import RegisterForm
 
 logging.basicConfig(level=logging.INFO)
-sessionStorage = {}
 
 app = Flask(__name__)
 api = Api(app)
@@ -61,7 +56,6 @@ def index():
     for ad in advertisings:
         ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
 
-    print("asdasdasd", category)
     return render_template('main.html', title='Главная страница', advertisings=advertisings, category=category)
 
 
@@ -189,8 +183,6 @@ def edit_ad(ad_id):
         if advertising:
             if form.image.data is None:
                 random_name = advertising.image
-                shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
-                                os.path.abspath(os.curdir + '/static/img/' + random_name))
             else:
                 random_name = get_random_name() + "." + form.image.data.filename.split(".")[-1]
                 form.image.data.save(os.path.join('static/img/', random_name))
@@ -202,8 +194,7 @@ def edit_ad(ad_id):
                 form.instagram.data = advertising.instagram
                 form.site.data = advertising.site
                 form.telephone.data = advertising.telephone
-                categor = session.query(Category).filter(Category.id == advertising.id_category).first()
-                form.category.data = categor.name
+                form.category.data = session.query(Category).filter(Category.id == advertising.id_category).first().name
             else:
                 if form.validate_on_submit():
                     advertising.title = form.title.data
@@ -215,17 +206,14 @@ def edit_ad(ad_id):
                     advertising.telephone = form.telephone.data
                     categor = session.query(Category).filter(Category.name == form.category.data).first()
                     advertising.id_category = categor.id
-                    t = str(int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000)))
-                    if form.image.data is None:
-                        t += '.jpg'
-                        shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
-                                        os.path.abspath(os.curdir + '/static/img/' + t))
-                    else:
-                        t += "." + form.image.data.filename.split('.')[-1]
+                    if not (form.image.data is None):
+                        t = str(
+                            int(datetime.datetime.now().replace().timestamp() * 1000000 + random.randint(1, 1000))) + \
+                            "." + form.image.data.filename.split('.')[-1]
 
                         shutil.move(os.path.abspath(os.curdir + '/static/img/' + random_name),
                                     os.path.abspath(os.curdir + '/static/img/' + t))
-                    advertising.image = t
+                        advertising.image = t
                     session.commit()
 
                     return redirect('/my_advertising')
@@ -263,18 +251,13 @@ def advertising_page(ad_id):
     return render_template('advertising_page.html', title='Объявление', advertising=advertising, category=category)
 
 
-@app.route('/alice', methods=['POST'])
-def alice():
-    return dialog_alice(request)
-
-
 if __name__ == '__main__':
     db_session.global_init("db/buy_sell_db.sqlite")
     api.add_resource(users_resource.UsersListResource, '/api/v1/users')
     api.add_resource(users_resource.UsersResource, '/api/v1/user/<int:user_id>')
 
     api.add_resource(alice_users_resource.AliceUsersListResource, '/api/v1/alice_users')
-    api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<int:user_id>')
+    api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<user_id>')
 
     api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
     api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
@@ -284,5 +267,13 @@ if __name__ == '__main__':
 
     session = db_session.create_session()
     category = [cat.name for cat in session.query(Category).all()]
-
-    app.run(port=5056)
+    if not category:
+        session = db_session.create_session()
+        category = ["Техника", "Книги", "Игрушки", "Продукты"]
+        for name in category:
+            categor = Category(
+                name=name,
+            )
+            session.add(categor)
+            session.commit()
+    app.run(debug=True, host='127.0.0.1', port=5055)

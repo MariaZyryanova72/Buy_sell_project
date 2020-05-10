@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restful import reqparse, abort, Resource
-from data import db_session
-from data.advertisings import Advertising
+from .data import db_session
+from .data.advertisings import Advertising
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True, type=str)

@@ -63,7 +63,7 @@ def start_check(tel):
     global flag
     if tel[:1] == "+":
         tel = tel[1:]
-        if tel[:3] == "359" or tel[:2] == "55" or tel[0] == "1":
+        if tel[:3] == "359" or tel[:2] == "55" or tel[0] == "docker-compose.yaml":
             parenthesis_check(tel)
         elif tel[0] == "7":
             flag = True
