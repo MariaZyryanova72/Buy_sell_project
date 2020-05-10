@@ -42,19 +42,26 @@ def load_user(user_id):
     return session.query(User).get(user_id)
 
 
-@app.route('/',  methods=['GET'])
+@app.route('/', methods=['GET'])
 def index():
     session = db_session.create_session()
+    cat = request.args.get("cat")
+    if cat:
+        cat = session.query(Category).filter(Category.name == cat).first()
+        advertisings = session.query(Advertising).filter(Advertising.categories == cat)
+    else:
+        advertisings = session.query(Advertising)
     q = request.args.get('q')
     if q:
-        advertisings = session.query(Advertising).filter(Advertising.title.like(f'%{q}%') |
-                                                         Advertising.text.like(f'%{q}%')).all()
+        advertisings = advertisings.filter(Advertising.title.like(f'%{q}%') | Advertising.text.like(f'%{q}%')).all()
     else:
-        advertisings = session.query(Advertising).all()
+        advertisings = advertisings.all()
 
     for ad in advertisings:
         ad.create_date = ad.create_date.strftime("%Y-%m-%d %H.%M.%S")
-    return render_template('main.html', title='Главная страница', advertisings=advertisings)
+
+    print("asdasdasd", category)
+    return render_template('main.html', title='Главная страница', advertisings=advertisings, category=category)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -109,7 +116,7 @@ def logout():
 
 
 def get_random_name():
-    return "".join([str(random.randrange(0,9)) for _ in range(20)])
+    return "".join([str(random.randrange(0, 9)) for _ in range(20)])
 
 
 @app.route('/my_advertising', methods=['GET'])
@@ -128,7 +135,6 @@ def my_advertising():
 @app.route('/new_ad', methods=['GET', 'POST'])
 def new_ad():
     form = AdvertisingForm()
-    #form.category = category[0]
     if form.image.data is None:
         random_name = get_random_name() + '.jpg'
         shutil.copyfile(os.path.abspath(os.curdir + '/static/img/default_ad.jpg'),
@@ -252,6 +258,7 @@ def advertising_page(ad_id):
     advertising = session.query(Advertising).filter(Advertising.id == ad_id).first()
     id_cat = advertising.id_category
     category = session.query(Category).filter(Category.id == id_cat).first()
+    advertising.create_date = advertising.create_date.strftime("%Y-%m-%d %H.%M.%S")
     return render_template('advertising_page.html', title='Объявление', advertising=advertising, category=category)
 
 
@@ -274,5 +281,4 @@ if __name__ == '__main__':
     session = db_session.create_session()
     category = [cat.name for cat in session.query(Category).all()]
 
-    app.run(port=5055)
-
+    app.run(port=5056)

@@ -1,5 +1,11 @@
+.but_category {
+    background-color: rgba(255, 255, 255, 0);
+    text-align: left;
+    width: 100%;
+}
+
 .body_center {
-    margin-left: 15%;
+    margin-left: 2%;
     margin-right: 2%;
 
 }

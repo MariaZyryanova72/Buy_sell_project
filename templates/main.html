@@ -1,39 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="row">
+    <div class="col-md-2">
+        {% for cat in category %}
+        <button class="but_category" onclick="click_cat(this)" onmouseover = "over(this)" onmouseout = "out(this)">{{ cat }}</button>
+        {% endfor %}
+    </div>
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-10" style="width: 70%">
+                <h1>Объявления</h1>
+                {% for advertising in advertisings %}
+                <a style="text-decoration: none;
+                            color: #000 !important;" href="/ad/{{ advertising.id }}"><div class="row border rounded mt-30 p-bottom-15 p-top-15">
+                    <div class="col-md-4">
+                        <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
+                    </div>
+                    <div class="col-md-8">
 
-    <div class="row">
-        <div class="col-md-10" style="width: 70%">
-            <h1>Объявления</h1>
-            {% for advertising in advertisings %}
-            <a style="text-decoration: none;
-                    color: #000 !important;" href="/ad/{{ advertising.id }}"><div class="row border rounded mt-30 p-bottom-15 p-top-15">
-                <div class="col-md-4">
-                    <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
-                </div>
-                <div class="col-md-8">
-
-                    {% if advertising.title|length > 30  %}
-                    <h2>{{ advertising.title[:30] + "..." }}</h2>
-                    {% else %}
-                    <h2>{{ advertising.title }}</h2>
-                    {% endif %}
-                    <br>
-                    <div>
-                        {% if advertising.text|length > 400 %}
-                            {{ advertising.text[:400] + "..." }}
+                        {% if advertising.title|length > 30  %}
+                        <h2>{{ advertising.title[:30] + "..." }}</h2>
                         {% else %}
-                            {{ advertising.text }}
+                        <h2>{{ advertising.title }}</h2>
                         {% endif %}
+                        <br>
+                        <div>
+                            {% if advertising.text|length > 400 %}
+                            {{ advertising.text[:400] + "..." }}
+                            {% else %}
+                            {{ advertising.text }}
+                            {% endif %}
+                        </div>
+                        <div style="text-align: right">
+                            <br>Дата написания - {{ advertising.create_date }}
+                        </div>
                     </div>
-
-                    <div style="text-align: right">
-                        <br>Дата написания - {{ advertising.create_date }}
-                    </div>
-                </div>
-            </div></a>
-            {% endfor %}
+                </div></a>
+                {% endfor %}
+            </div>
         </div>
     </div>
-
+</div>
+<script>
+    function out(obj) {
+        obj.style.background='#FFFFFF';
+    }
+    function over(obj) {
+        obj.style.background='#6839cf';
+    }
+    function click_cat(obj) {
+        window.location.href='/?cat=' + obj.firstChild.data
+    }
+</script>
 {% endblock %}
