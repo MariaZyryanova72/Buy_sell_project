@@ -11,6 +11,7 @@ from flask_restful import Api
 import users_resource
 import alice_users_resource
 import advertings_resource
+import category_resource
 
 from adform import AdvertisingForm
 from data import db_session
@@ -277,6 +278,9 @@ if __name__ == '__main__':
 
     api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
     api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
+
+    api.add_resource(category_resource.CategoryUsersListResource, '/api/v1/categories')
+    api.add_resource(category_resource.CategoryUsersResource, '/api/v1/category/<int:category_id>')
 
     session = db_session.create_session()
     category = [cat.name for cat in session.query(Category).all()]
