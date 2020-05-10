@@ -1,19 +1,22 @@
 import logging
 import json
-import os
 from threading import Thread
 
-from data import db_session
-from data.advertisings import Advertising
-from data.alice_users import AliceUser
-from const import *
+from flask import Flask, request
+
+from alice.const import *
 import requests
 
 logging.basicConfig(level=logging.INFO)
 sessionStorage = {}
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'bfhdjwiskoldjEFE4GUJFTYGGG5G5G65H6G565F3222JGTHGRFDJSKE;ROJELAGTRH4TF'
+URL = "https://bfebd58c.ngrok.io"
 
-def dialog_alice(request):
+
+@app.route('/alice', methods=['POST'])
+def main():
     logging.info(f'Request: {request.json!r}')
     response = {
         'session': request.json['session'],
@@ -33,8 +36,8 @@ def handle_dialog(res, req):
 
     if req['session']['new']:
         res['response']['buttons'] = []
-        session = db_session.create_session()
-        user = session.query(AliceUser).filter(AliceUser.id_user == user_id).first()
+        user_name = requests.get(URL + '/api/v1/alice_user/' + user_id).json()
+
         sessionStorage[user_id] = {
             'commands': ['Куплю', 'Продам', 'Помощь'],
             'current_dialog_id': '',
@@ -42,10 +45,11 @@ def handle_dialog(res, req):
             'data_id_image': [],
             'current_ad': 0
         }
-        if user:
-            res['response']['text'] = f'Привет, { user.name }!\n' \
+        if 'error' not in user_name:
+            user_name = user_name['user']['name']
+            res['response']['text'] = f'Привет, {user_name}!\n' \
                                       f'Что хотите? Купить или продать?'
-            sessionStorage[user_id]['first_name'] = user.name
+            sessionStorage[user_id]['first_name'] = user_name
             res['response']['buttons'] = [
                 {'title': "Куплю", 'hide': True},
                 {'title': "Продам", 'hide': True},
@@ -64,7 +68,7 @@ def handle_dialog(res, req):
         else:
             sessionStorage[user_id]['first_name'] = first_name[0].upper() + first_name[1:]
             add_user_db(sessionStorage[user_id]['first_name'], user_id)
-            res['response']['text'] = f"Приятно познакомиться, { sessionStorage[user_id]['first_name'] }!\n" \
+            res['response']['text'] = f"Приятно познакомиться, {sessionStorage[user_id]['first_name']}!\n" \
                                       f"'Что хотите? Купить или продать?"
             res['response']['buttons'] = [
                 {'title': "Куплю", 'hide': True},
@@ -102,7 +106,7 @@ def handle_dialog(res, req):
     elif command in ['Показать', 'Показать ещё'] and sessionStorage[user_id]['current_dialog_id'] == 'BuyData':
         buy(res, req)
         sessionStorage[user_id]['current_ad'] += 1
-        if (sessionStorage[user_id]['current_ad'] == 5) or len(sessionStorage[user_id]['data']) ==\
+        if (sessionStorage[user_id]['current_ad'] == 5) or len(sessionStorage[user_id]['data']) == \
                 sessionStorage[user_id]['current_ad']:
             sessionStorage[user_id]['current_dialog_id'] = ''
             sessionStorage[user_id]['commands'] = ['Продам', 'Помощь', 'В начало', 'Куплю']
@@ -119,24 +123,22 @@ def handle_dialog(res, req):
 def worker(filename, title, req):
     user_id = req['session']['user_id']
     headers = {'Authorization': 'OAuth AgAAAAAxjNpYAAT7o-FF8PGuY0mlrZN0Uxt91Wo'}
-
-    my_files = {'file': open(os.curdir + '/static/img/' + filename, 'rb')}
+    img = requests.get(URL + '/static/img/' + filename)
     response = requests.post('https://dialogs.yandex.net/api/v1/skills/c05a819e-7883-4b1c-9ba5-e48f79b81efa/images',
-                             files=my_files,
+                             files={'file': img.content},
                              headers=headers)
     sessionStorage[user_id]['data_id_image'].append([json.loads(response.content)['image']['id'], title])
 
 
 def search_data(res, req):
     user_id = req['session']['user_id']
-    session = db_session.create_session()
     q = req['request']['original_utterance']
-    advertisings = session.query(Advertising).filter(Advertising.title.like(f'%{q}%') |
-                                                     Advertising.text.like(f'%{q}%')).all()[:5]
-    sessionStorage[user_id]['data'] = [ad.image for ad in advertisings]
+    advertisings = requests.get(URL + '/api/v1/advertisings').json()['advertisings']
+    advertisings = [ad for ad in advertisings if q in ad['title'] or q in ad['text']]
+    sessionStorage[user_id]['data'] = [ad['image'] for ad in advertisings]
 
     for ad in advertisings:
-        t = Thread(target=worker, args=(ad.image, ad.title, req, res,))
+        t = Thread(target=worker, args=(ad['image'], ad['title'], req,))
         t.start()
         t.join()
 
@@ -209,10 +211,11 @@ def get_first_name(req):
             return entity['value'].get('first_name', None)
 
 
-def add_user_db(name, id_user):
-    user = AliceUser()
-    user.name = name
-    user.id_user = id_user
-    session = db_session.create_session()
-    session.add(user)
-    session.commit()
+def add_user_db(name, user_id):
+    requests.post(URL + '/api/v1/alice_users', json={
+        "name": name, "id_user": user_id
+    }).json()
+
+
+if __name__ == '__main__':
+    app.run(port=5057)

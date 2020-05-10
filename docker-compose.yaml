@@ -1,0 +1,18 @@
+version: "3"
+
+volumes:
+  buy_sell_db:
+
+services:
+  buy_sell_server:
+    build: server/
+    restart: always
+    ports:
+    - 5055:5055
+
+  alice:
+    build: alice/
+    restart: always
+    ports:
+    - 5057:5057
+

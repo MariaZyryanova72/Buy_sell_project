@@ -9,6 +9,4 @@ class Category(SqlAlchemyBase, SerializerMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String)
-    id_parent_category = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    end_category = sqlalchemy.Column(sqlalchemy.Boolean)
     advertisings = orm.relation("Advertising", back_populates='categories')
