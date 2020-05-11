@@ -4,7 +4,7 @@ from threading import Thread
 
 from flask import Flask, request
 
-from .package.const import *
+from package.const import *
 import requests
 
 logging.basicConfig(level=logging.INFO)
