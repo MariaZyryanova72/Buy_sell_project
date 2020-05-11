@@ -8,15 +8,15 @@ import datetime
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from flask_restful import Api
 
-from server.api import advertings_resource, alice_users_resource, category_resource, users_resource
+from package.api import users_resource, advertings_resource, category_resource, alice_users_resource
 
-from server.form.adform import AdvertisingForm
-from server.data import db_session
-from server.data.advertisings import Advertising
-from server.data.categories import Category
-from server.data.users import User
-from server.form.loginform import LoginForm
-from server.form.registerform import RegisterForm
+from package.form.adform import AdvertisingForm
+from package.data import db_session
+from package.data.advertisings import Advertising
+from package.data.categories import Category
+from package.data.users import User
+from package.form.loginform import LoginForm
+from package.form.registerform import RegisterForm
 
 logging.basicConfig(level=logging.INFO)
 

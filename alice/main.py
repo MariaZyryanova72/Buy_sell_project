@@ -4,7 +4,7 @@ from threading import Thread
 
 from flask import Flask, request
 
-from alice.const import *
+from .package.const import *
 import requests
 
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +12,7 @@ sessionStorage = {}
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'bfhdjwiskoldjEFE4GUJFTYGGG5G5G65H6G565F3222JGTHGRFDJSKE;ROJELAGTRH4TF'
-URL = "https://bfebd58c.ngrok.io"
+URL = "http://84.201.173.242:5055/"
 
 
 @app.route('/alice', methods=['POST'])
