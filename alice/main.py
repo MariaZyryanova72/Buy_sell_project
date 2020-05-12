@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 URL = "http://84.201.134.221/"
 
 
-@app.route('/alice', methods=['POST'])
+@app.route('/alice/talk', methods=['POST'])
 def main():
     logging.info(f'Request: {request.json!r}')
     response = {
@@ -90,7 +90,7 @@ def handle_dialog(res, req):
 
     elif command == 'Продам' and command in sessionStorage[user_id]['commands']:
         sessionStorage[user_id]['commands'] = ['Куплю', 'Помощь', 'В начало']
-        res['response']['text'] = 'Продам'
+        res['response']['text'] = 'Данный раздел находится в разработке'
         sessionStorage[user_id]['current_dialog_id'] = 'Sel'
 
     elif command == 'В начало' and command in sessionStorage[user_id]['commands']:
@@ -105,6 +105,7 @@ def handle_dialog(res, req):
         else:
             res['response']['text'] = 'У меня есть кое-что для вас! Показать?'
             sessionStorage[user_id]['current_dialog_id'] = 'BuyData'
+            sessionStorage[user_id]['current_ad'] = 0
 
     elif command in ['Показать', 'Показать ещё', 'На сайт']\
             and sessionStorage[user_id]['current_dialog_id'] == 'BuyData':
@@ -121,6 +122,10 @@ def handle_dialog(res, req):
             res['response']['text'] = 'Поиск окончен. Что хотите? Купить или продать?'
         else:
             res['response']['text'] = ''
+
+    elif command == 'На сайт':
+        res['response']['text'] = 'Всегда рада помочь =)'
+
     alice_buttons(res, req)
 
 
@@ -150,7 +155,8 @@ def search_data(res, req):
 
 def buy(res, req):
     user_id = req['session']['user_id']
-    data = sessionStorage[user_id]['data_id_image'][0]
+    data = sessionStorage[user_id]['data_id_image'][sessionStorage[user_id]['current_ad']]
+    sessionStorage[user_id]['current_ad'] += 1
     res['response']['card'] = {}
     res['response']['text'] = ''
     res['response']['card']['type'] = 'BigImage'
