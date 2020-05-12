@@ -24,7 +24,7 @@ app = Flask(__name__)
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-app.config['SECRET_KEY'] = 'bfhdjwiskoldjEFE4GUJFTYGGG5G5G65H6G565F3222JGTHGRFDJSKE;ROJELAGTRH4TF'
+app.config['SECRET_KEY'] = os.urandom(24)
 
 
 @app.errorhandler(404)
@@ -251,29 +251,31 @@ def advertising_page(ad_id):
     return render_template('advertising_page.html', title='Объявление', advertising=advertising, category=category)
 
 
-if __name__ == '__main__':
-    db_session.global_init("db/buy_sell_db.sqlite")
-    api.add_resource(users_resource.UsersListResource, '/api/v1/users')
-    api.add_resource(users_resource.UsersResource, '/api/v1/user/<int:user_id>')
+db_session.global_init("db/buy_sell_db.sqlite")
+api.add_resource(users_resource.UsersListResource, '/api/v1/users')
+api.add_resource(users_resource.UsersResource, '/api/v1/user/<int:user_id>')
 
-    api.add_resource(alice_users_resource.AliceUsersListResource, '/api/v1/alice_users')
-    api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<user_id>')
+api.add_resource(alice_users_resource.AliceUsersListResource, '/api/v1/alice_users')
+api.add_resource(alice_users_resource.AliceUsersResource, '/api/v1/alice_user/<user_id>')
 
-    api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
-    api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
+api.add_resource(advertings_resource.AdvertisingUsersListResource, '/api/v1/advertisings')
+api.add_resource(advertings_resource.AdvertisingUsersResource, '/api/v1/advertising/<int:ad_id>')
 
-    api.add_resource(category_resource.CategoryUsersListResource, '/api/v1/categories')
-    api.add_resource(category_resource.CategoryUsersResource, '/api/v1/category/<int:category_id>')
+api.add_resource(category_resource.CategoryUsersListResource, '/api/v1/categories')
+api.add_resource(category_resource.CategoryUsersResource, '/api/v1/category/<int:category_id>')
 
+session = db_session.create_session()
+category = [cat.name for cat in session.query(Category).all()]
+if not category:
     session = db_session.create_session()
-    category = [cat.name for cat in session.query(Category).all()]
-    if not category:
-        session = db_session.create_session()
-        category = ["Техника", "Книги", "Игрушки", "Продукты"]
-        for name in category:
-            categor = Category(
-                name=name,
-            )
-            session.add(categor)
-            session.commit()
+    category = ["Техника", "Книги", "Игрушки", "Продукты"]
+    for name in category:
+        categor = Category(
+            name=name,
+        )
+        session.add(categor)
+        session.commit()
+
+
+if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5055)
