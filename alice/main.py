@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 from threading import Thread
 
 from flask import Flask, request
@@ -11,8 +12,8 @@ logging.basicConfig(level=logging.INFO)
 sessionStorage = {}
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'bfhdjwiskoldjEFE4GUJFTYGGG5G5G65H6G565F3222JGTHGRFDJSKE;ROJELAGTRH4TF'
-URL = "http://dekor72.ru/"
+app.config['SECRET_KEY'] = os.urandom(24)
+URL = "http://84.201.134.221/"
 
 
 @app.route('/alice', methods=['POST'])
@@ -31,6 +32,7 @@ def main():
 
 
 def handle_dialog(res, req):
+    res['response']['text'] = ''
     res['response']['end_session'] = False
     user_id = req['session']['user_id']
 
