@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row" style="width: 97%; margin-left: 2%;">
+    <h1>Объявление</h1>
+        <div class="row border rounded mt-30 p-bottom-15 p-top-15">
+            <div class="col-md-4">
+                <img class="mt-15 br"  src="/static/img/{{ advertising.image }}" width="100%">
+            </div>
+            <div class="col-md-8">
+                <h2>{{ advertising.title }}</h2>
+                <br><div class="dropdown-divider"></div><br>
+                <div>
+                    {{ advertising.text }}
+                </div><br>
+                <div>
+                    Категория - {{ category.name }}
+                </div>
+                {% if advertising.telephone %}
+                    <div>
+                        Телефон - {{ advertising.telephone }}
+                    </div>
+                {% endif %}
+                {% if advertising.vk %}
+                    <div>
+                        ВК - {{ advertising.vk }}
+                    </div>
+                {% endif %}
+                {% if advertising.instagram %}
+                    <div>
+                        Инстаграм - {{ advertising.instagram }}
+                    </div>
+                {% endif %}
+                {% if advertising.site %}
+                    <div>
+                        Сайт - {{ advertising.site }}
+                    </div>
+                {% endif %}
+                <br><div class="dropdown-divider"></div><br>
+                    <div>
+                        Цена {{ advertising.price }}
+                    </div>
+                <div>
+                    <br>Автор - {{ current_user.name }}, Дата написания - {{ advertising.create_date }}
+                </div>
+                {% if current_user.id == advertising.id_user %}
+                    <div><br>
+                        <a href="/my_advertising/edit_ad/{{ advertising.id }}" class="btn btn-warning">Изменить</a>
+                        <a href="/my_advertising/delete_ad/{{ advertising.id }}" class="btn btn-danger">Удалить</a>
+                    </div>
+                {% endif %}
+
+
+            </div>
+        </div>
+</div>
+
+
+
+{% endblock %}
